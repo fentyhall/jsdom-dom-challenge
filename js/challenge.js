@@ -1,51 +1,78 @@
 // Make sure the timer works
 const counter = document.getElementById('counter');
-const plusButton = document.getElementById('plus');
-const minusButton = document.getElementById('minus');
-const heartButton = document.getElementById('heart');
+const buttonGroup = document.querySelector("#button-group");
+// const plusButton = document.getElementById('plus');
+// const minusButton = document.getElementById('minus');
+// const heartButton = document.getElementById('heart');
 const pauseButton = document.getElementById('pause');
 const submitButton = document.getElementById('submit');
-const likesUl = document.getElementsByClassName('likes');
+const likesUl = document.querySelector('.likes');
 const commentsDiv = document.getElementById('list')
 
-let timer = setInterval(incrementCounter, 1000);
+// Make sure the pause button works properly 
+let paused = false;
+
+setInterval( () => {
+    if (!paused) incrementCounter();
+}, 1000);
+
 let count = parseInt(counter.innerText);
+let likedNumbers = {};
 
 function incrementCounter() {
     count++;
-    counter.innerHTML = count;    
+    counter.innerText = count;    
 }
 
 function decrementCounter() {
     count--;
-    counter.innerHTML = count;
+    counter.innerText = count;
 }
 
-plusButton.addEventListener('click', incrementCounter);
-minusButton.addEventListener('click', decrementCounter);
-
-// Make sure the pause button works properly 
-let isTimmerRunning = true;
-
-pauseButton.addEventListener('click', () => {
-    if (isTimmerRunning === true) {
-        clearInterval(timer);
-        pauseButton.innerText = 'resume';
-        minusButton.disabled = true;
-        plusButton.disabled = true;
-        heartButton.disabled = true;
-        submitButton.disabled = true;
-        isTimerRunning = false;
-    } else { 
-        timer = setTimeout(incrementCounter, 1000);
-        pauseButton.innerText = 'pause';
-        minusButton.disabled = false;
-        plusButton.disabled = false;
-        heartButton.disabled = false;  
-        submitButton.disabled = false;  
-        isTimerRunning = true;
+buttonGroup.addEventListener("click", event => {
+    if (event.target.id === "plus") {
+        incrementCounter();
+    } else if (event.target.id === "minus") {
+        decrementCounter();
+    } else if (event.target.id === "heart") {
+        updateLikes();
+    } else if (event.target.id === "pause") {
+        togglePause();
     }
 })
+
+function updateLikes() {
+    if (likedNumbers[count]) {
+        likedNumbers[count] += 1;
+
+        const li = document.querySelector(`[data-number='${count}']`);
+        li.innerText = `${count} has been liked ${likedNumbers[count]} time`;
+    } else {
+        likedNumbers[count] = 1;
+
+        const li = document.createElement("li");
+        li.dataset.number = count;
+        li.innerText = `${count} has been liked 1 time`
+        likesUl.append(li);
+    }
+}
+
+function togglePause() {
+    paused = !paused;
+    const allBtns = document.querySelectorAll("button");
+
+    allBtns.forEach(btn => {
+        if (btn.id !== "pause") {
+            btn.disabled = paused;
+        }
+    })
+
+    if (paused) {
+        pauseButton.innerHTML = "resume";
+    } else {
+        pauseButton.innerHTML = "pause"
+    }
+}
 
 submitButton.addEventListener('click', function(e) {
     e.preventDefault();
